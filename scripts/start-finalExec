@@ -493,8 +493,23 @@ else
   fi
 
   if isTrue "${EXEC_DIRECTLY:-false}"; then
-    exec java "${finalArgs[@]}"
+     echo "#!/bin/bash
+      if [[ -n \"\${VELOCITY_FORWARDING_SECRET_FILE:-}\" ]]; then
+        export PAPER_VELOCITY_SECRET=\"\$(<\"\${VELOCITY_FORWARDING_SECRET_FILE}\")\"
+      fi
+      java ${finalArgs[@]}
+      " > run.sh
+    chmod +x run.sh
+    exec java -Dpaperclip.patchonly=true "${finalArgs[@]}"
   else
-    exec mc-server-runner ${bootstrapArgs} "${mcServerRunnerArgs[@]}" java "${finalArgs[@]}"
+    echo "#!/bin/bash
+           if [[ -n \"\${VELOCITY_FORWARDING_SECRET_FILE:-}\" ]]; then
+             export PAPER_VELOCITY_SECRET=\"\$(<\"\${VELOCITY_FORWARDING_SECRET_FILE}\")\"
+           fi
+           mc-server-runner ${bootstrapArgs} ${mcServerRunnerArgs[@]} java ${finalArgs[@]}
+           " > run.sh
+    chmod +x run.sh
+    exec mc-server-runner ${bootstrapArgs} "${mcServerRunnerArgs[@]}" java -Dpaperclip.patchonly=true "${finalArgs[@]}"
+
   fi
 fi

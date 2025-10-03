@@ -62,7 +62,7 @@ WORKDIR /data
 STOPSIGNAL SIGTERM
 
 # End user MUST set EULA and change RCON_PASSWORD
-ENV TYPE=VANILLA VERSION=LATEST EULA="" UID=1000 GID=1000 LC_ALL=en_US.UTF-8
+ENV TYPE=VANILLA VERSION=LATEST EULA="TRUE" UID=1000 GID=1000 LC_ALL=en_US.UTF-8
 
 COPY --chmod=755 scripts/start* /
 COPY --chmod=755 files/shims/ /usr/local/bin/
@@ -72,9 +72,6 @@ COPY --chmod=755 files/auto /auto
 RUN curl -fsSL -o /image/Log4jPatcher.jar https://github.com/CreeperHost/Log4jPatcher/releases/download/v1.0.1/Log4jPatcher-1.0.1.jar
 
 RUN dos2unix /start* /auto/*
-
-ENTRYPOINT [ "/start" ]
-HEALTHCHECK --start-period=2m --retries=2 --interval=30s CMD mc-health
 
 ARG BUILDTIME=local
 ARG VERSION=local
