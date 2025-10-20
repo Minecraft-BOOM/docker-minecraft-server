@@ -466,6 +466,7 @@ else
   # Specifically want the variables to expand to args, so...
   # shellcheck disable=SC2206
   finalArgs=(
+    $JVM_XX_OPTS
     $expandedDOpts
   )
 
@@ -498,7 +499,7 @@ else
                if [[ -n \"\${MEMORY}\" ]]; then
                  JVM_OPTS=\"\${JVM_OPTS} -Xms\${MEMORY} -Xmx\${MEMORY}\"
                fi
-               mc-server-runner ${bootstrapArgs} ${mcServerRunnerArgs[@]} java ${JVM_XX_OPTS} \${JVM_OPTS} ${finalArgs[@]}
+               mc-server-runner ${bootstrapArgs} ${mcServerRunnerArgs[@]} java \${JVM_OPTS} ${finalArgs[@]}
                " > run.sh
   chmod +x run.sh
   exec mc-server-runner ${bootstrapArgs} "${mcServerRunnerArgs[@]}" java -Dpaperclip.patchonly=true "${finalArgs[@]}"
