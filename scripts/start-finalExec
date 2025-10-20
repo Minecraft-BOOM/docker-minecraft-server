@@ -466,8 +466,6 @@ else
   # Specifically want the variables to expand to args, so...
   # shellcheck disable=SC2206
   finalArgs=(
-    $JVM_XX_OPTS
-    $JVM_OPTS
     $expandedDOpts
   )
 
@@ -492,24 +490,18 @@ else
     set -x
   fi
 
-  if isTrue "${EXEC_DIRECTLY:-false}"; then
-     echo "#!/bin/bash
-      if [[ -n \"\${VELOCITY_FORWARDING_SECRET_FILE:-}\" ]]; then
-        export PAPER_VELOCITY_SECRET=\"\$(<\"\${VELOCITY_FORWARDING_SECRET_FILE}\")\"
-      fi
-      java ${finalArgs[@]}
-      " > run.sh
-    chmod +x run.sh
-    exec java -Dpaperclip.patchonly=true "${finalArgs[@]}"
-  else
-    echo "#!/bin/bash
-           if [[ -n \"\${VELOCITY_FORWARDING_SECRET_FILE:-}\" ]]; then
-             export PAPER_VELOCITY_SECRET=\"\$(<\"\${VELOCITY_FORWARDING_SECRET_FILE}\")\"
-           fi
-           mc-server-runner ${bootstrapArgs} ${mcServerRunnerArgs[@]} java ${finalArgs[@]}
-           " > run.sh
-    chmod +x run.sh
-    exec mc-server-runner ${bootstrapArgs} "${mcServerRunnerArgs[@]}" java -Dpaperclip.patchonly=true "${finalArgs[@]}"
+  echo "#!/bin/bash
+               if [[ -n \"\${VELOCITY_FORWARDING_SECRET_FILE:-}\" ]]; then
+                 export PAPER_VELOCITY_SECRET=\"\$(<\"\${VELOCITY_FORWARDING_SECRET_FILE}\")\"
+               fi
+               JVM_OPTS=\"${JVM_OPTS}\"
+               if [[ -n \"\${MEMORY}\" ]]; then
+                 JVM_OPTS=\"\${JVM_OPTS} -Xms\${MEMORY} -Xmx\${MEMORY}\"
+               fi
+               mc-server-runner ${bootstrapArgs} ${mcServerRunnerArgs[@]} java ${JVM_XX_OPTS} \${JVM_OPTS} ${finalArgs[@]}
+               " > run.sh
+  chmod +x run.sh
+  exec mc-server-runner ${bootstrapArgs} "${mcServerRunnerArgs[@]}" java -Dpaperclip.patchonly=true "${finalArgs[@]}"
 
   fi
 fi
